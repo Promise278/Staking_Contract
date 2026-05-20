@@ -1,13 +1,28 @@
-# Sample Hardhat Project
+# Staking Contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+A simple staking contract built with Solidity and Hardhat.
 
-Try running some of the following tasks:
+## What it does
+- Stake tokens
+- Unstake tokens
+- View your stake or anyone else's
 
-```shell
-npx hardhat help
+## Functions
+
+- `stake(amount)` — lock your tokens
+- `unstake()` — get your tokens back
+- `getStakeByAddress(address)` — see stake by wallet
+- `getStakeByIndex(index)` — see stake by position
+- `getAllStakes()` — see all stakes ever made
+- `totalStaked` — total tokens staked right now
+
+## How to run
+
+```bash
+npm install
+npx hardhat compile
 npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
+
+---
+Developed by PromotexDev
