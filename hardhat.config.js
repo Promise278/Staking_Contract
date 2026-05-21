@@ -11,7 +11,7 @@ module.exports = {
   },
   networks: {
     sepolia: {
-      url: process.env.SEPLOIA_URL,
+      url: process.env.SEPOLIA_URL || process.env.SEPLOIA_URL,
       accounts: [process.env.PRIVATE_KEY],
     },
   },
