@@ -76,6 +76,11 @@ contract Erc20Token {
         _mint(to, amount);
     }
 
+    function transferOwnership(address newOwner) public onlyOwner {
+        require(newOwner != address(0), "Invalid owner");
+        owner = newOwner;
+    }
+
     function _mint(address to, uint256 amount) internal {
         _totalSupply += amount;
         _balance[to] += amount;
