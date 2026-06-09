@@ -100,8 +100,35 @@ function timeLeft(pos: StakePosition): string {
 }
 
 // ─── Read positions (pure viem publicClient) ──────────────────────────────────
+// Contract deployed around this block — avoids scanning the entire chain
+const CONTRACT_DEPLOY_BLOCK = 7800000n;
+// Max blocks per eth_getLogs request — public RPCs typically cap at 10k-50k
+const CHUNK_SIZE = 50000n;
+
+async function getLogsInChunks(
+  client: PublicClient,
+  fromBlock: bigint,
+  toBlock: bigint,
+  user: `0x${string}`
+) {
+  const all = [];
+  for (let start = fromBlock; start <= toBlock; start += CHUNK_SIZE) {
+    const end = start + CHUNK_SIZE - 1n < toBlock ? start + CHUNK_SIZE - 1n : toBlock;
+    const chunk = await client.getContractEvents({
+      address: STAKING_ADDRESS,
+      abi: STAKING_ABI,
+      eventName: "Staked",
+      args: { user },
+      fromBlock: start,
+      toBlock: end,
+    });
+    all.push(...chunk);
+  }
+  return all;
+}
+
 async function loadPositions(client: PublicClient, userAddress: string): Promise<StakePosition[]> {
-  const user = getAddress(userAddress);
+  const user = getAddress(userAddress) as `0x${string}`;
 
   const nftAddr = await client.readContract({
     address: STAKING_ADDRESS,
@@ -109,14 +136,8 @@ async function loadPositions(client: PublicClient, userAddress: string): Promise
     functionName: "nft",
   });
 
-  const stakedLogs = await client.getContractEvents({
-    address: STAKING_ADDRESS,
-    abi: STAKING_ABI,
-    eventName: "Staked",
-    args: { user },
-    fromBlock: 0n,
-    toBlock: "latest",
-  });
+  const latestBlock = await client.getBlockNumber();
+  const stakedLogs = await getLogsInChunks(client, CONTRACT_DEPLOY_BLOCK, latestBlock, user);
 
   if (stakedLogs.length === 0) return [];
 
